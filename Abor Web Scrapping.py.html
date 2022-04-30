@@ -1,0 +1,136 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[12]:
+
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup as soup
+from datetime import date
+import pandas as pd
+
+
+# In[13]:
+
+
+data ={}
+house_no=0
+
+with open('Desktop/Austinurls.txt', 'r') as f:
+    for url in f:
+        #print(url)
+        uPage = urlopen(url)
+        page_html = uPage.read()
+        uPage.close()
+        #print(uPage)
+        #print(page_html)
+        
+        page_soup = soup(page_html, "html.parser")
+        #print(page_soup)
+        
+        containers = page_soup.findAll("div", {"class":"wrapper page-front"})
+        
+        #print(containers)
+        for container in containers:
+            
+            today = date.today()
+            #print("Today's date:", today)
+            
+            abor_descp = container.findAll("span", {"class":"public-remarks"})
+            #print(abor_descp)
+            descp = abor_descp[0].text.strip()
+            
+            abor_address = container.findAll("h1", {"class":"m-0"})
+            #print(abor_address)
+            address = abor_address[0].text.strip()
+
+            abor_price = container.findAll("h2", {"class":"m-0"})
+            #print(abor_price)
+            price = abor_price[0].text.strip()
+            actualprice = price[9:]
+            sale = price[4:8]
+            
+            abor_listed = container.findAll("small", {"class":"days-on-market"})
+            #print(abor_listed)
+            listed = abor_listed[0].text.strip()
+            day_no = listed[7:9]
+            days = listed[:14]
+            f_o_r = listed[22:]
+            
+            
+            #abor_status = container.findAll("ul", {"class":"list-unstyled icon-list"})
+            abor_status = container.findAll("span")[26]
+            #print(abor_status)
+            Astatus = abor_status.text.strip()
+            status = Astatus[7:]
+            #print(status)
+            
+            abor_sqft = container.findAll("span")[33]
+            #print(abor_sqft)
+            Nsqft = abor_sqft.text.strip()
+            sqft = Nsqft[6:]
+            
+            abor_dollarsqft = container.findAll("span")[34]
+            #print(abor_dollarsqft)
+            dollarsqft = abor_dollarsqft.text.strip()
+            
+            abor_lotsize = container.findAll("span")[35]
+            #print(abor_lotsize)
+            Nlotsize = abor_lotsize.text.strip()
+            lotsize =Nlotsize[9:]
+            
+            #print(descp)
+            house_no+=1
+            #print(house_no)
+            data[house_no] = [url,address,status,sale,actualprice,today,day_no,f_o_r,sqft,dollarsqft,lotsize,descp]
+            
+            #print(sqft)
+            #print(dollarsqft)
+            #print(lotsize)
+            #print(sale)
+            #print(address)
+            #print(price)
+            #print(actualprice)
+            
+            #print(status)
+            
+            #print(listed)
+            #print(day_no)
+            #print(days)
+            #print(f_o_r)
+            
+            
+        
+print("Total Houses:", house_no)            
+data_df = pd.DataFrame.from_dict(data, orient = 'index', columns = ['Link','Addess', 'Status','Sale','Price','Today Date','No days','Previous Price','Sq.ft','$/sqft','Lot Size','Description'])
+
+
+# In[9]:
+
+
+
+
+
+# In[10]:
+
+
+data_df.to_csv('Abor_Hinfo.csv')
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
